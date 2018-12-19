@@ -1,3 +1,4 @@
+#Im too lazy to do full comments now
 
 from math import floor 
 from math import ceil 
