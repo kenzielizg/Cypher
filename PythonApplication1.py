@@ -566,3 +566,86 @@ def wordLengthCypher(text, floatHandling=0, pattern=1, inversePattern=False, cyp
 	cyphText = seriesCypher(text, wordLenString, floatHandling, pattern, inversePattern, cyphNums, standardFormat, incNums)
 	return cyphText
 
+
+class mutableKey():
+	def __init__(self, key='', alpha='abcdefghijklmnopqrstuvwxyz'):
+		self.key = key
+		self.alpha = alpha
+	
+	#adds a letter to the kay
+	def add(self, char):
+		self.key = self.key + char
+
+	#finds index of letter in key
+	def ind(self, char):
+		return self.key.find(char)
+
+	#removes letter from key and its pair in alpha
+	def rem(self, keyChar, alphaChar):
+		self.key = self.key.replace(keyChar,'')
+		self.alpha = self.alpha.replace(alphaChar,'')
+
+	#gets the corresponding letter
+	#goes from key to alpha
+	def get(self, char):
+		index = self.ind(char)
+		newChar = self.alpha[index]
+		self.rem(char, newChar)
+		return newChar
+
+def mutKeyCharCypher(text, generator, standardFormat=True, incNums=True, basicAlpha='abcdefghijklmnopqrstuvwxyz'):
+	"""
+	Encrypts with continuously changing alphabets, if a character is not included in the generator or basicAlpha
+		then it will not be encrypted
+	text: string to be encoded
+	generator: creates key alphabet with fo76 method
+	standardFormat: if true string returns as only uppercase alphanumerics
+	incNums: whether or not numbers are included in standard format
+	basicAlpha: the alphabet shifted into
+	"""
+	if standardFormat:
+		text = filterString(text, incNums)
+
+	cypherText = ''
+	#tracker will keep track of what mutableKey a given letter is in
+	tracker = {}
+	#generate keyAlpha to be used
+	keyAlpha = keyAlphabet(generator, basicAlpha)
+	#fill tracker with all character that can be encrypted
+	for char in keyAlpha:
+		tracker[char] = 0
+
+	#holds the different mutableKeys, given a number to call by for given char tracker value
+	keyDict = {0: mutableKey(keyAlpha, basicAlpha)}
+
+
+	for char in text:
+		#tracking upeprcase
+		cap=False
+		if char.isupper():
+			cap=True
+			char = char.lower()
+		#if character belongs to set it will be encrypted
+		if char in keyAlpha:
+			#get char's mutableKey level
+			n = tracker[char]
+			#increment char's value
+			tracker[char] = n+1
+			#get encrypted char by calling the mutableKey it is in calling .get method
+			newChar = keyDict[n].get(char)
+			#if the mutableKey object for level has not been created yet, create it
+			if n+1 not in keyDict:
+				keyDict[n+1] = mutableKey(char, alpha=basicAlpha)
+			else:
+				#if it has then add the next char to the key
+				keyDict[n+1].add(char)
+		#if not encrypted dont do anything, reassign to newChar for gg ez
+		else:
+			newChar = char
+		#if need recap
+		newChar = newChar.upper() if cap else newChar
+		#making new string
+		cypherText = cypherText + newChar
+
+	return cypherText
+
