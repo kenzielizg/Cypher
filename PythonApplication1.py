@@ -318,7 +318,7 @@ def fibonacciCypher(text, root, floatHandling=0, pattern=1, inversePattern=False
 	cyphText = seriesCypher(text, fibString, floatHandling, pattern, inversePattern, cyphNums, standardFormat, incNums)
 	return cyphText
 
-def seriesCypher(text, series, floatHandling=0, pattern=1, inversePattern=False, cyphNums=True, standardFormat=True, incNums=True):
+def seriesCypher(text, series, floatHandling=0, pattern=1, inversePattern=False, cyphNums=True, standardFormat=True, incNums=True, pattern2=1, pattern3=1):
 	"""
 	Encrypts text using any series of numbers as a key, treats each digit as the shift value
 	text: string to be encrypted
@@ -350,7 +350,8 @@ def seriesCypher(text, series, floatHandling=0, pattern=1, inversePattern=False,
 		#only shift alphanumeric
 		if isAlphaNum(char, cyphNums):
 			#gets shift value and applied pattern using % operator
-			value = int(series[index]) if index%pattern == 0 else -int(series[index])
+			pattBool = index%pattern==0 or (pattern2!=1 and index%pattern2==0) or (pattern3!=1 and index%pattern3==0)
+			value = int(series[index]) if pattBool else -int(series[index])
 			#if inversePattern is true this will inverse values
 			if inversePattern:
 				value = -value
@@ -649,3 +650,55 @@ def mutKeyCharCypher(text, generator, standardFormat=True, incNums=True, basicAl
 
 	return cypherText
 
+
+def vigenere2(text, keyword, revKey=False, revText=False, cyphNums=True, standardFormat=True, incNums=True):
+	"""
+	Vigener with options for how keyword is applied
+	pairs (revKey,revText):
+		(0,0): normal vigener, full word applied at beginning
+		(1,0): keyword applied backwards
+		(1,1): keyword applied with full word applied at end
+			(identical to 0,0 if text length is evenly divisible by keyword)
+		(0,1): keyword applied backwards with full word applied to eng
+	"""
+
+	if revKey:
+		keyword = keyword[::-1]
+	if revText:
+		text = text[::-1]
+
+	cypherText = vigenere(text, keyword, cyphNums, standardFormat, incNums)
+
+	if revText:
+		cypherText = cypherText[::-1]
+
+	return cypherText
+
+def invertedKeyAlpha(generator, original='abcdefghijklmnopqrstuvwxyz'):
+	"""
+	Creates keyAlpha using generator that will invert the direction of encryption
+		for cypher it is used in, given it its alpha to alpha type
+
+		not fully tested
+	"""
+	key = keyAlphabet(generator, original)
+	print(key)
+	newKey = ''
+	for char in original:
+		print(char)
+		index = key.find(char)
+		newKey = newKey + original[index]
+
+	return newKey
+
+def patternTest(len,par=1,par2=1,par3=1):
+	"""
+	To check pattern that will be used in seriesCypher, 1 == positive
+	"""
+	pattern=''
+
+	for n in range(len):
+		k = 1 if n%par==0 or (par2!=1 and n%par2==0) or (par3!=1 and n%par3==0) else 0
+		pattern = pattern + str(k)
+	print(pattern)
+	return pattern
