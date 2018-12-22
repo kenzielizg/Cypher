@@ -102,7 +102,7 @@ def caesar(text, factor, cyphNums=True, standardFormat=True, incNums=True):
 
 	return cypherText
 
-def vigenere(text, keyword, cyphNums=True, standardFormat=True, incNums=True):
+def vigenere(text, keyword, cyphNums=True, standardFormat=True, incNums=True, revKey=False, revText=False):
 	"""
 	Encrypts text by using an overlayed keyword to determine each chatacter's shift
 	text: string to be encrypted
@@ -111,10 +111,20 @@ def vigenere(text, keyword, cyphNums=True, standardFormat=True, incNums=True):
 	standardFormat: whether all caps, not spaces, no punctuation format it used
 	incNums: Whether numbers get taken out of text
 	returns encrypted text
+	pairs (revKey,revText):
+		(0,0): normal vigener, full word applied at beginning
+		(1,0): keyword applied backwards
+		(1,1): keyword applied with full word applied at end
+			(identical to 0,0 if text length is evenly divisible by keyword)
+		(0,1): keyword applied backwards with full word applied to end
 	"""
 	#Requires: filterString, isAlphaNum, shift
 	if standardFormat:
 		text = filterString(text, incNums)
+	if revKey:
+		keyword = keyword[::-1]
+	if revText:
+		text = text[::-1]
 
 	keylength = len(keyword)
 	cypherText = ''
@@ -127,6 +137,9 @@ def vigenere(text, keyword, cyphNums=True, standardFormat=True, incNums=True):
 			n = n + 1
 		else:
 			cypherText = cypherText + char
+			
+	if revText:
+		cypherText = cypherText[::-1]
 	return cypherText
 
 
@@ -593,6 +606,13 @@ class mutableKey():
 		newChar = self.alpha[index]
 		self.rem(char, newChar)
 		return newChar
+	
+	def pair(self, char):
+		index = self.ind(char)
+		if index == -1:
+			return char
+		newChar = self.alpha[index % (len(self.alpha)+1) ]
+		return newChar
 
 def mutKeyCharCypher(text, generator, standardFormat=True, incNums=True, basicAlpha='abcdefghijklmnopqrstuvwxyz'):
 	"""
@@ -651,28 +671,6 @@ def mutKeyCharCypher(text, generator, standardFormat=True, incNums=True, basicAl
 	return cypherText
 
 
-def vigenere2(text, keyword, revKey=False, revText=False, cyphNums=True, standardFormat=True, incNums=True):
-	"""
-	Vigener with options for how keyword is applied
-	pairs (revKey,revText):
-		(0,0): normal vigener, full word applied at beginning
-		(1,0): keyword applied backwards
-		(1,1): keyword applied with full word applied at end
-			(identical to 0,0 if text length is evenly divisible by keyword)
-		(0,1): keyword applied backwards with full word applied to eng
-	"""
-
-	if revKey:
-		keyword = keyword[::-1]
-	if revText:
-		text = text[::-1]
-
-	cypherText = vigenere(text, keyword, cyphNums, standardFormat, incNums)
-
-	if revText:
-		cypherText = cypherText[::-1]
-
-	return cypherText
 
 def invertedKeyAlpha(generator, original='abcdefghijklmnopqrstuvwxyz'):
 	"""
