@@ -1,3 +1,8 @@
+"""
+Actual trash design because I didnt even try to layout the
+	logic first
+"""
+
 from random import randint
 
 def rotorGen(length):
